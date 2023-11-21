@@ -1,27 +1,28 @@
 from utils.utils import generate
-import gradio as gr
+import panel as pn
+import asyncio
 
-def chat_with_openai(message, history):
-    return generate(message)
+# always run this first
+pn.extension()
 
-with gr.Blocks() as demo:
-    chatbot = gr.Chatbot()
-    msg     = gr.Textbox(lines=1)
-    clear   = gr.ClearButton([msg, chatbot])
+# use async callbacks whenever possible
+async def callback_fn(contents: str, user: str, instance: pn.chat.ChatInterface):
+    message = f"Echoing {user}: {contents}"
+    output = ""
+    for char in message:
+        output += char
+        yield output
 
-    def greetings():
-        bot_message = "Aloha"
-        return bot_message
+# this is our chat ui
+chat_ui = pn.chat.ChatInterface(
+    callback=callback_fn, 
+    callback_user="John"
+)
 
-    def respond(message, chat_history):
-        if chat_history is None:
-            return "", "greetings"
-        else:
-            bot_message = generate(message)
-            chat_history.append((message, bot_message))
-            return "", chat_history
-    
-    # event trigger
-    msg.submit(respond, [msg, chatbot], [msg, chatbot])
+# initial greeting
+chat_ui.send({"object": "Aloha!", "user": "John", "avatar": "👨🏻‍🍳"}, respond=False)
 
-demo.launch()
+# layout formation
+template = pn.template.MaterialTemplate(title="Simple Chatbot", sidebar=[])
+template.main.append(pn.Row(chat_ui))
+template.servable()
