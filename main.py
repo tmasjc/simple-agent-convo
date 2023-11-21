@@ -1,13 +1,12 @@
 from utils.utils import generate
 import panel as pn
-import asyncio
 
 # always run this first
 pn.extension()
 
-# use async callbacks whenever possible
+# for fast loading
 async def callback_fn(contents: str, user: str, instance: pn.chat.ChatInterface):
-    message = f"Echoing {user}: {contents}"
+    message = generate(contents)
     output = ""
     for char in message:
         output += char
