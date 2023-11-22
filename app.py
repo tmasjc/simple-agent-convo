@@ -1,14 +1,16 @@
 from utils.utils import generate
-from utils.common import logger
+from utils.common import logger, redis_client
 import panel as pn
 from bokeh.io import curdoc
+import json
 
-# always run this first
+# initialize and configure Panel
 pn.extension("perspective")
 
 # get session id as convo marker
 doc = curdoc()
-logger.trace(f"{doc.session_context.id}")
+CONVERSATION_ID = doc.session_context.id
+logger.trace(f"Start new: {CONVERSATION_ID}")
 
 # update system prompt here
 messages = [
@@ -26,7 +28,8 @@ async def chat_fn(content: str, user: str, instance: pn.chat.ChatInterface):
     
     # append and log output when finish
     messages.append({"role": "assistant", "content": final_output})
-    logger.trace(messages) 
+    redis_client.set(CONVERSATION_ID, json.dumps(messages))
+    logger.trace(messages)
 
 # build chat function
 chat_ui = pn.chat.ChatInterface(
