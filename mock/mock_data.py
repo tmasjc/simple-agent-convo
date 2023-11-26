@@ -1,6 +1,6 @@
 import json
 
-with open('mock_users.json', 'r') as f:
+with open('mock/mock_users.json', 'r') as f:
     """
     Expected something like this,
     {

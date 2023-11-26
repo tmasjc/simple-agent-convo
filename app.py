@@ -4,7 +4,7 @@ from utils.database import ChatSession, add_session_record
 import panel as pn
 from bokeh.io import curdoc
 import json
-from mock_data import mock_session
+from mock.mock_data import mock_session
 
 # initialize and configure Panel
 pn.extension("perspective")
