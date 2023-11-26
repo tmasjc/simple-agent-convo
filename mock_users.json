@@ -1,0 +1,10 @@
+{
+    "bot": {
+        "name": "Bob",
+        "avatar": "🤖"
+    },
+    "user": {
+        "name": "Tom",
+        "avatar": "👨🏻"
+    }
+}
