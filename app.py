@@ -1,5 +1,6 @@
 from utils.utils import generate
 from utils.common import logger, redis_client
+from utils.database import ChatSession, add_session_record
 import panel as pn
 from bokeh.io import curdoc
 import json
@@ -7,33 +8,47 @@ import json
 # initialize and configure Panel
 pn.extension("perspective")
 
-# conversation session info
+# manual set conversation session info
 doc = curdoc()
 chat_session = {
-    "id": doc.session_context.id,
     "bot":  {"name": "Bob", "avatar": "🤖"},
     "user": {"name": "Tom", "avatar": "👨🏻"},
 }
-logger.trace(f"Start new: {chat_session}")
+
+CURRENT_SESSION = ChatSession(
+    chat_session_id=doc.session_context.id, 
+    bot_identifier=chat_session['bot']['name'], 
+    player_identifier=chat_session["user"]['name']
+    )
+logger.trace(f"{CURRENT_SESSION}")
 
 # update system prompt here
 messages = [
     {"role": "system", "content": "You are a helpful assistant."},
 ]
 
+def insert_new_record():
+    if len(messages) == 1:
+        add_session_record(CURRENT_SESSION)
+        return True
+    return None
+
 # chat's callback func
 async def chat_fn(content: str, user: str, instance: pn.chat.ChatInterface):
-    messages.append({"role": "user", "content": content})
+    # only do once at the beginning
+    if insert_new_record():
+        logger.trace("Inserted new record.")
 
     # stream output to screen
     final_output = ""
+    messages.append({"role": "user", "content": content})
     async for partial_result in generate(messages):
         final_output = partial_result
         yield partial_result
 
     # append and log output when finish
     messages.append({"role": "assistant", "content": final_output})
-    redis_client.set(chat_session.get("id"), json.dumps(messages))
+    redis_client.set(doc.session_context.id, json.dumps(messages))
     logger.trace(messages)
 
 

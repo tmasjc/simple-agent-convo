@@ -175,3 +175,6 @@ pyrightconfig.json
 
 # ignore config
 config.ini
+
+# ignore database 
+*.db
