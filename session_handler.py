@@ -13,16 +13,18 @@ logger.success("Pub/Sub is active.")
 for message in pubsub.listen():
     if message['type'] == 'message':
         session_id = message['data'].decode()
-        logger.success(f"Session id: {session_id}")
+        # logger.success(f"Session id: {session_id}")
         raw_content = redis_client.get(session_id) 
         if raw_content: 
             summary = summarize(raw_content.decode())
             logger.trace(f"Convo Summary: {summary[:300:]}...") # displays the first xx chars only
             session = Session() # insert to database
             record  = session.query(ChatSession).filter(ChatSession.chat_session_id == session_id).first()
+            logger.trace(record)
             if record:
                 record.summary = summary # update summary here
                 session.commit()
+                logger.trace("Update summary complete.")
             else:
                 logger.debug(f"No record {session_id} found.")
             session.close()

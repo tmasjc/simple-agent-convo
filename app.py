@@ -1,9 +1,9 @@
+import json
+import panel as pn
+from bokeh.io import curdoc
 from utils.utils import generate
 from utils.common import logger, redis_client
 from utils.database import ChatSession, add_session_record
-import panel as pn
-from bokeh.io import curdoc
-import json
 from mock.mock_data import mock_session
 
 # initialize and configure Panel
@@ -45,7 +45,8 @@ async def chat_fn(content: str, user: str, instance: pn.chat.ChatInterface):
     # append and log output when finish
     messages.append({"role": "assistant", "content": final_output})
     redis_client.set(doc.session_context.id, json.dumps(messages))
-    logger.trace(messages)
+    # logger.trace(messages)
+    logger.trace("Messages++")
 
 chat_ui = pn.chat.ChatInterface(
     callback=chat_fn,
