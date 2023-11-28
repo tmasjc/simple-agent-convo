@@ -1,9 +1,10 @@
 import json
 import panel as pn
 from bokeh.io import curdoc
-from utils.utils import generate
 from utils.common import logger, redis_client
+from utils.utils import generate, greeting
 from utils.database import ChatSession, add_session_record
+from utils.memory import retrieve_latest_memory
 from mock.mock_data import mock_session
 
 # initialize and configure Panel
@@ -25,7 +26,8 @@ logger.trace(f"{CURRENT_SESSION}")
 
 # update system prompt here
 messages = [
-    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "system", 
+    "content": "You are a AI wizard. You speak elegantly and gracefully. Full of wisdom and charm."},
 ]
 
 # chat's callback func
@@ -33,7 +35,7 @@ async def chat_fn(content: str, user: str, instance: pn.chat.ChatInterface):
     # only do once at the beginning
     if len(messages) == 1:
         add_session_record(CURRENT_SESSION)
-        logger.success("Successfuly inserted new record.")
+        logger.success("Began conversation. Added new record.")
 
     # stream output to screen
     final_output = ""
@@ -60,9 +62,10 @@ chat_ui = pn.chat.ChatInterface(
 )
 pn.chat.ChatInterface.user = USER
 
-# initial greeting
+# initial greeting func
+memory = retrieve_latest_memory("player_identifier", USER)
 chat_ui.send(
-    {"object": "Aloha!", "user": BOT}, respond=False
+    {"object": greeting(memory), "user": BOT}, respond=False
 )
 
 # layout formation
