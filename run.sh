@@ -8,6 +8,6 @@ trap 'cleanup' SIGINT
 
 python3 session_handler.py & 
 
-panel serve --setup setup.py --admin-log-level info app.py & 
+panel serve --setup setup.py --admin-log-level info --show --autoreload app.py & 
 
 wait

@@ -69,6 +69,6 @@ chat_ui.send(
 )
 
 # layout formation
-template = pn.template.MaterialTemplate(title="Simple Chatbot", sidebar=[])
+template = pn.template.MaterialTemplate(title="Wizard Bob, The Wise & Old", sidebar=[])
 template.main.append(pn.Row(chat_ui))
 template.servable()

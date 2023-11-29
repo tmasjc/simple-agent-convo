@@ -1,3 +1,4 @@
+import random
 from utils.common import config, logger
 from openai import OpenAI, AsyncOpenAI
 
@@ -55,5 +56,17 @@ def greeting(content: str, model: str = DEFAULT_MODEL):
             model=model, messages=messages, temperature=1
         )
         result = response.choices[0].message.content
-        return result
-    return "Greetings!" # default fallback
+        return result # greeting generated from LLM
+    wizard_greetings = [
+            "Greetings from the realms beyond!",
+            "Well met by moonlight and starshine!",
+            "Salutations from the whispers of the ancient winds!",
+            "Hail and well met, traveler of the mortal coil!",
+            "By the alchemy of old, I bid you welcome!",
+            "From the depths of the mystic ether, I greet thee!",
+            "May the wisdom of the ages be upon our meeting!",
+            "Under the watchful eye of the arcane, our paths cross!",
+            "Blessings of the enchanted realms upon you!",
+            "In the light of the aurora mystica, greetings!"
+        ]
+    return random.choice(wizard_greetings)  # default fallback
