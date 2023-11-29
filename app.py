@@ -13,9 +13,12 @@ pn.extension("perspective")
 # to get current panel document object
 doc = curdoc()
 
+# access user information
+logger.success(f"New logged in: {pn.state.user}")
+
 # conversation entities
 BOT  = mock_session["bot"].get("name", "bot")
-USER = mock_session["user"].get("name", "user")
+USER = pn.state.user
 
 CURRENT_SESSION = ChatSession(
     chat_session_id=doc.session_context.id, 
@@ -55,18 +58,18 @@ chat_ui = pn.chat.ChatInterface(
     callback_user=BOT,
     message_params=dict(
         default_avatars={
-            BOT:  mock_session["bot"]["avatar"],
-            USER: mock_session["user"]["avatar"],
+            BOT:  mock_session["bot"]["avatar"]
         },
     ),
 )
 pn.chat.ChatInterface.user = USER
 
 # initial greeting func
-memory = retrieve_latest_memory("player_identifier", USER)
-chat_ui.send(
-    {"object": greeting(memory), "user": BOT}, respond=False
-)
+if USER:
+    memory = retrieve_latest_memory("player_identifier", USER)
+    chat_ui.send(
+        {"object": greeting(memory), "user": BOT}, respond=False
+    )
 
 # layout formation
 logout = pn.widgets.Button(name="Log out") 

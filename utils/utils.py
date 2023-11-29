@@ -34,7 +34,7 @@ def summarize(content: str, model: str = DEFAULT_MODEL):
     return result
 
 
-def greeting(content: str, model: str = DEFAULT_MODEL):
+def greeting(content: str | None, model: str = DEFAULT_MODEL):
     messages = [
         {
             "role": "system",

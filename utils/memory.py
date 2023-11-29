@@ -43,4 +43,6 @@ def retrieve_latest_memory(var: str, value: str) -> str | None:
             .first()
         )
         # logger.trace(record.id)
-        return record.memory
+        if record:
+            return record.memory
+        return None
