@@ -69,6 +69,8 @@ chat_ui.send(
 )
 
 # layout formation
-template = pn.template.MaterialTemplate(title="Wizard Bob, The Wise & Old", sidebar=[])
+logout = pn.widgets.Button(name="Log out") 
+logout.js_on_click(code="""window.location.href = './logout'""")
+template = pn.template.MaterialTemplate(title="Wizard Bob, The Wise & Old", sidebar=[logout])
 template.main.append(pn.Row(chat_ui))
 template.servable()
