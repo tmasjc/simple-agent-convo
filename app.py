@@ -8,7 +8,7 @@ from utils.memory import retrieve_latest_memory
 from mock.mock_data import mock_session
 
 # initialize and configure Panel
-pn.extension("perspective")
+pn.extension()
 
 # to get current panel document object
 doc = curdoc()
@@ -71,9 +71,14 @@ if USER:
         {"object": greeting(memory), "user": BOT}, respond=False
     )
 
-# layout formation
-logout = pn.widgets.Button(name="Log out") 
+# logout button
+logout = pn.widgets.Button(icon="logout", name="Exit Chat") 
 logout.js_on_click(code="""window.location.href = './logout'""")
-template = pn.template.MaterialTemplate(title="Wizard Bob, The Wise & Old", sidebar=[logout])
-template.main.append(pn.Row(chat_ui))
+
+template = pn.template.BootstrapTemplate(
+    title="Wizard Bob",
+    sidebar=[], header_background="#2F4F4F "
+)
+template.header.append(logout)
+template.main.append(pn.Column(chat_ui))
 template.servable()
