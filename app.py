@@ -68,7 +68,7 @@ pn.chat.ChatInterface.user = USER
 if USER:
     memory = retrieve_latest_memory("player_identifier", USER)
     chat_ui.send(
-        {"object": greeting(memory), "user": BOT}, respond=False
+        {"object": greeting(memory, USER), "user": BOT}, respond=False
     )
 
 # logout button
