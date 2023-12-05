@@ -30,12 +30,13 @@ tools = [
 ]
 
 
-def get_memory(event: str, target: str):
+# mock memory retrieval
+def get_memory(event: str = "", target: str = ""):
     logger.trace(f"Event: {event}, Target: {target}")
-    return "We talked about going to a party."  # mock
+    return "We talked about going to a party."
 
 
-def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
+async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
     messages = [
         {
             "role": "system",
@@ -50,11 +51,11 @@ def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
     logger.trace(transform_dialogue(dialogue[1::]))
     for message in messages:
         message["content"] = replace_keywords(message["content"], mapping)
-    response = client.chat.completions.create(
+    response = await async_client.chat.completions.create(
         model=model, messages=messages, temperature=1
     )
     result = response.choices[0].message.content
-    return result
+    yield result
 
 
 async def generate(content: str, model: str = DEFAULT_MODEL):
@@ -66,15 +67,15 @@ async def generate(content: str, model: str = DEFAULT_MODEL):
     if result:
         for char in result:
             output += char
+            yield output
     else:
         subject_person = completion.choices[0].message.tool_calls
         logger.trace(subject_person)
         parsed_args = json.loads(subject_person[0].function.arguments)
         memory = get_memory(**parsed_args)
-        reply = generate2(content, memory)
-        for char in reply:
-            output += char
-    yield output
+        async for char in generate2(content, memory):
+            output = char
+            yield output
 
 
 def summarize(content: str, model: str = DEFAULT_MODEL):

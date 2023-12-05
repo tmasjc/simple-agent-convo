@@ -7,6 +7,14 @@ from utils.database import ChatSession, add_session_record
 from utils.memory import retrieve_latest_memory
 from mock.mock_data import mock_session
 
+# break if Redis isn't up
+try: 
+    redis_client.ping()
+    print("Connected to Redis")
+except Exception as e:
+    logger.debug("Check Redis")
+    exit(1)
+
 # initialize and configure Panel
 pn.extension()
 
