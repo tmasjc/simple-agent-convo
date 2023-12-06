@@ -177,4 +177,5 @@ pyrightconfig.json
 config.ini
 
 # ignore database 
-*.db
+*.sqlite3
+*.bin

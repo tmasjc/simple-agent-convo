@@ -22,7 +22,7 @@ class ChatSession(Base):
 
 
 # connect to database
-engine = create_engine("sqlite:///memory.db")
+engine = create_engine("sqlite:///memory.sqlite3")
 Base.metadata.create_all(engine)
 
 # construct a new .sessionmaker
