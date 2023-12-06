@@ -3,31 +3,11 @@ import json
 from utils.common import config, logger
 from utils.helper import replace_keywords, transform_dialogue
 from openai import OpenAI, AsyncOpenAI
+from story.extras import SYSTEM_CHARACTER, tools
 
 client = OpenAI(api_key=config["OPENAI"]["api_key"])
 async_client = AsyncOpenAI(api_key=config["OPENAI"]["api_key"])
 DEFAULT_MODEL = "gpt-3.5-turbo"
-
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_memory",
-            "description": "Recall content of previous conversation from memory.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "event": {
-                        "type": "string",
-                        "description": "Event or topic to recall, e.g. talking about politics, asking someone's status.",
-                    },
-                    "target": {"type": "string", "description": "person of subject"},
-                },
-                "required": ["event"],
-            },
-        },
-    }
-]
 
 
 # mock memory retrieval
@@ -40,7 +20,7 @@ async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
     messages = [
         {
             "role": "system",
-            "content": "You are a AI wizard. You speak elegantly and gracefully. Full of wisdom and charm.",
+            "content": SYSTEM_CHARACTER,
         },
         {
             "role": "user",
@@ -98,7 +78,7 @@ def greeting(content: str | None, username: str, model: str = DEFAULT_MODEL):
     messages = [
         {
             "role": "system",
-            "content": "You are a AI wizard. You speak elegantly and gracefully. Full of wisdom and charm.",
+            "content": SYSTEM_CHARACTER,
         },
         {
             "role": "user",
