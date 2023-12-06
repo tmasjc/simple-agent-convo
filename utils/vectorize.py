@@ -4,6 +4,7 @@ from utils.common import config, logger
 
 # to create embedding
 openai_client = OpenAI(api_key=config["OPENAI"]["api_key"])
+OUTPUT_DIMENSIONS = 1536
 
 # to store embedding
 chroma_client = PersistentClient("./")
@@ -27,18 +28,29 @@ def do_vectorize(content: str, model: str = "text-embedding-ada-002") -> list:
     resp = openai_client.embeddings.create(input=content, model=model)
     return resp.data[0].embedding
 
-def insert_vector(session_id: str, content: str, metadatas: dict = None) -> bool:
+def initiate_vector(session_id: str, user: str) -> None:
+    """
+    """
+    chroma_coll.add(
+        ids=session_id,
+        documents="",
+        embeddings=[0]*OUTPUT_DIMENSIONS,
+        metadatas={"user": user}
+    )
+
+def insert_vector(session_id: str, content: str) -> bool:
     """
     A convenient wrapper to store vector into collection. 
     
     See `collection.add`.
     """
     try:
-        chroma_coll.add(
+        content_vec = do_vectorize(content)
+        logger.trace(content_vec[1:10:])
+        chroma_coll.update(
             ids=session_id,
-            embeddings=do_vectorize(content),
-            documents=content,
-            metadatas=metadatas
+            embeddings=content_vec,
+            documents=content
         )
     except Exception as e:
         logger.debug(e)
