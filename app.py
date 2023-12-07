@@ -54,7 +54,7 @@ async def chat_fn(content: str, user: str, instance: pn.chat.ChatInterface):
     # stream output to screen
     final_output = ""
     messages.append({"role": "user", "content": content})
-    async for partial_result in generate(messages):
+    async for partial_result in generate(user, messages):
         final_output = partial_result
         yield partial_result
 

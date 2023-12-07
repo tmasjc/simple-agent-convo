@@ -26,7 +26,9 @@ def activate_recall(func: str, event: str = "", person: str = ""):
     return content_recalled
 
 
-async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
+async def generate2(
+    friend: str, dialogue: list, memory: str, model: str = DEFAULT_MODEL
+):
     messages = [
         {
             "role": "system",
@@ -34,12 +36,21 @@ async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
         },
         {
             "role": "user",
-            "content": 'The following is a dialogue between you and a friend. \n"""\n{{dialogue}}\n"""\nYou recall previous conversations, \n"""\n{{memory}}\n"""\nHow do you reply?',
+            "content": 'The following is a dialogue between you and a friend {{friend}}. \n"""\n{{dialogue}}\n"""\nYou recall from your memory, \n"""\n{{memory}}\n"""\nHow do you reply to {{friend}}?',
         },
     ]
-    mapping = {"{{dialogue}}": transform_dialogue(dialogue[1::]), "{{memory}}": memory}
+
+    flat_convo = transform_dialogue(dialogue[1::])
+    mapping = {
+        "{{dialogue}}": flat_convo,
+        "{{memory}}": memory,
+        "{{friend}}": friend,
+    }
+
     for message in messages:
         message["content"] = replace_keywords(message["content"], mapping)
+        # logger.trace(message)
+
     response = await async_client.chat.completions.create(
         model=model, messages=messages, temperature=1
     )
@@ -47,7 +58,7 @@ async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
     yield result
 
 
-async def generate(content: str, model: str = DEFAULT_MODEL):
+async def generate(friend: str, content: str, model: str = DEFAULT_MODEL):
     completion = await async_client.chat.completions.create(
         model=model, messages=content, tools=tools, tool_choice="auto"
     )
@@ -62,7 +73,7 @@ async def generate(content: str, model: str = DEFAULT_MODEL):
         parsed_args = json.loads(tool_calls[0].function.arguments)
         func_name = tool_calls[0].function.name
         memory = activate_recall(func_name, **parsed_args)
-        async for char in generate2(content, memory):
+        async for char in generate2(friend, content, memory):
             output = char
             yield output
 
