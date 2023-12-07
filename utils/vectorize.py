@@ -5,12 +5,11 @@ from utils.common import config, logger
 # to create embedding
 openai_client = OpenAI(api_key=config["OPENAI"]["api_key"])
 OUTPUT_DIMENSIONS = 1536
+COLLECTION_NAME = "memory_collection"
 
 # to store embedding
 chroma_client = PersistentClient("./")
-chroma_coll = chroma_client.create_collection(
-    name="memory_collection", get_or_create=True
-)
+chroma_coll = chroma_client.create_collection(name=COLLECTION_NAME, get_or_create=True)
 
 
 def do_vectorize(content: str, model: str = "text-embedding-ada-002") -> list:
@@ -89,6 +88,6 @@ def get_metadata(person: str):
     Recall previous dialogues with someone.
     """
     resp = chroma_coll.get(where={"user": person})
-    docs = [_ for _ in resp.get("documents") if _] # remove empty strings
+    docs = [_ for _ in resp.get("documents") if _]  # remove empty strings
     logger.trace(docs)
     return f"{person} and I talked about " + "...".join(docs)

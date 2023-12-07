@@ -1,14 +1,14 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 from contextlib import contextmanager
 
 Base = declarative_base()
-
+TABLE_NAME = "chat_sessions"
 
 class ChatSession(Base):
-    __tablename__ = "chat_sessions"
+    __tablename__ = TABLE_NAME
 
     id = Column(Integer, primary_key=True)
     chat_session_id = Column(String, nullable=False)
@@ -28,10 +28,13 @@ Base.metadata.create_all(engine)
 # construct a new .sessionmaker
 Session = sessionmaker(bind=engine)
 
+# create a Metadata instance
+metadata = MetaData()
+
 
 @contextmanager
 def session_scope():
-    session = Session()  
+    session = Session()
     try:
         yield session
         session.commit()
