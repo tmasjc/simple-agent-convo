@@ -2,6 +2,7 @@ import random
 import json
 from utils.common import config, logger
 from utils.helper import replace_keywords, transform_dialogue
+from utils.vectorize import find_similar, get_metadata
 from openai import OpenAI, AsyncOpenAI
 from story.extras import SYSTEM_CHARACTER, tools, wizard_greetings
 
@@ -10,10 +11,19 @@ async_client = AsyncOpenAI(api_key=config["OPENAI"]["api_key"])
 DEFAULT_MODEL = "gpt-3.5-turbo"
 
 
-# mock memory retrieval
-def recall_memory(func: str, event: str = "", person: str = ""):
+def activate_recall(func: str, event: str = "", person: str = ""):
     logger.trace(f"Func: {func}, Event: {event}, Target: {person}")
-    return "We talked about going to a party."
+    function_map = {
+        "recall_event": (find_similar, [event]),
+        "recall_someone": (get_metadata, [person]),
+    }
+    if func in function_map:
+        func, args = function_map[func]
+        content_recalled = func(*args)
+    else:
+        logger.debug("Error: Function is not callable.")
+        return ""
+    return content_recalled
 
 
 async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
@@ -24,7 +34,7 @@ async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
         },
         {
             "role": "user",
-            "content": 'The following is a dialogue between you and a friend. \n"""\n{{dialogue}}\n"""\nYou recall your previous conversation, \n"""\n{{memory}}\n"""\nHow do you reply?',
+            "content": 'The following is a dialogue between you and a friend. \n"""\n{{dialogue}}\n"""\nYou recall previous conversations, \n"""\n{{memory}}\n"""\nHow do you reply?',
         },
     ]
     mapping = {"{{dialogue}}": transform_dialogue(dialogue[1::]), "{{memory}}": memory}
@@ -51,7 +61,7 @@ async def generate(content: str, model: str = DEFAULT_MODEL):
         tool_calls = completion.choices[0].message.tool_calls
         parsed_args = json.loads(tool_calls[0].function.arguments)
         func_name = tool_calls[0].function.name
-        memory = recall_memory(func_name, **parsed_args)
+        memory = activate_recall(func_name, **parsed_args)
         async for char in generate2(content, memory):
             output = char
             yield output
