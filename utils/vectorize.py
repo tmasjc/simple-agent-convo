@@ -30,6 +30,11 @@ def do_vectorize(content: str, model: str = "text-embedding-ada-002") -> list:
 
 def initiate_vector(session_id: str, user: str) -> None:
     """
+    A convenient wrapper to store vector into collection. 
+
+    Mainly to put metadata into vector database. Once `session_destroyed` is triggered, there's no way to pass session metadata to session handler.
+    
+    See `collection.add`.
     """
     chroma_coll.add(
         ids=session_id,
@@ -40,9 +45,9 @@ def initiate_vector(session_id: str, user: str) -> None:
 
 def insert_vector(session_id: str, content: str) -> bool:
     """
-    A convenient wrapper to store vector into collection. 
+    A convenient wrapper to update vector into collection. 
     
-    See `collection.add`.
+    See `collection.update`.
     """
     try:
         content_vec = do_vectorize(content)

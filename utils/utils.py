@@ -3,7 +3,7 @@ import json
 from utils.common import config, logger
 from utils.helper import replace_keywords, transform_dialogue
 from openai import OpenAI, AsyncOpenAI
-from story.extras import SYSTEM_CHARACTER, tools
+from story.extras import SYSTEM_CHARACTER, tools, wizard_greetings
 
 client = OpenAI(api_key=config["OPENAI"]["api_key"])
 async_client = AsyncOpenAI(api_key=config["OPENAI"]["api_key"])
@@ -11,8 +11,8 @@ DEFAULT_MODEL = "gpt-3.5-turbo"
 
 
 # mock memory retrieval
-def get_memory(event: str = "", target: str = ""):
-    logger.trace(f"Event: {event}, Target: {target}")
+def recall_memory(func: str, event: str = "", person: str = ""):
+    logger.trace(f"Func: {func}, Event: {event}, Target: {person}")
     return "We talked about going to a party."
 
 
@@ -27,8 +27,7 @@ async def generate2(dialogue: list, memory: str, model: str = DEFAULT_MODEL):
             "content": 'The following is a dialogue between you and a friend. \n"""\n{{dialogue}}\n"""\nYou recall your previous conversation, \n"""\n{{memory}}\n"""\nHow do you reply?',
         },
     ]
-    mapping = {"{{dialogue}}": str(dialogue), "{{memory}}": memory}
-    logger.trace(transform_dialogue(dialogue[1::]))
+    mapping = {"{{dialogue}}": transform_dialogue(dialogue[1::]), "{{memory}}": memory}
     for message in messages:
         message["content"] = replace_keywords(message["content"], mapping)
     response = await async_client.chat.completions.create(
@@ -49,10 +48,10 @@ async def generate(content: str, model: str = DEFAULT_MODEL):
             output += char
             yield output
     else:
-        subject_person = completion.choices[0].message.tool_calls
-        logger.trace(subject_person)
-        parsed_args = json.loads(subject_person[0].function.arguments)
-        memory = get_memory(**parsed_args)
+        tool_calls = completion.choices[0].message.tool_calls
+        parsed_args = json.loads(tool_calls[0].function.arguments)
+        func_name = tool_calls[0].function.name
+        memory = recall_memory(func_name, **parsed_args)
         async for char in generate2(content, memory):
             output = char
             yield output
@@ -95,16 +94,4 @@ def greeting(content: str | None, username: str, model: str = DEFAULT_MODEL):
         )
         result = response.choices[0].message.content
         return result  # greeting generated from LLM
-    wizard_greetings = [
-        "Greetings from the realms beyond!",
-        "Well met by moonlight and starshine!",
-        "Salutations from the whispers of the ancient winds!",
-        "Hail and well met, traveler of the mortal coil!",
-        "By the alchemy of old, I bid you welcome!",
-        "From the depths of the mystic ether, I greet thee!",
-        "May the wisdom of the ages be upon our meeting!",
-        "Under the watchful eye of the arcane, our paths cross!",
-        "Blessings of the enchanted realms upon you!",
-        "In the light of the aurora mystica, greetings!",
-    ]
     return random.choice(wizard_greetings)  # default fallback
