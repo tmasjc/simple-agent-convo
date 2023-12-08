@@ -1,0 +1,10 @@
+[DEFAULT]
+version=0.0.3
+
+[OPENAI]
+api_key=<insert OpenAI api key>
+
+[REDIS]
+host=localhost
+port=6379
+db=0
