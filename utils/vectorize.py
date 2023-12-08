@@ -1,4 +1,4 @@
-from chromadb import PersistentClient
+from chromadb import HttpClient
 from openai import OpenAI
 from utils.common import config, logger
 
@@ -8,7 +8,7 @@ OUTPUT_DIMENSIONS = 1536
 COLLECTION_NAME = "memory_collection"
 
 # to store embedding
-chroma_client = PersistentClient("./")
+chroma_client = HttpClient(host='localhost', port=8000)
 chroma_coll = chroma_client.create_collection(name=COLLECTION_NAME, get_or_create=True)
 
 
