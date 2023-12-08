@@ -9,6 +9,10 @@ Then, setup development environment as shown below.
 docker pull chromadb/chroma
 docker run -p 8000:8000 chromadb/chroma
 
+## on separate window
+redis-server
+
+## on separate window
 ## activate virtual environment and install dependencies
 python -m venv venv
 source venv/bin/activate
